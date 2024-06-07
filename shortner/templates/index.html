@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Url shortner</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+</head>
+<body class="bg-light">
+    <div class="container h-100 bg-light">
+        <div class="d-flex justify-content-center align-items-center bg-light" style="height: 100vh;">
+
+            <div class="card border-0 shadow w-50">
+                <div class="card-body text-center">
+                    <h3>Shorten Your url</h3>
+                    <div class="form-group mt-3">
+                        <form id="form" onsubmit="return false;">
+                        {% csrf_token %}
+                        <input type="text"  name="link" class="form-control" placeholder="your url...">
+                        <button class="btn btn-primary mt-3" onclick="shorten()">Shorten</button>
+                        </form>
+                       
+                    </div>
+                    <div class="input-group mb-3 mt-3">
+                        <input type="text" class="form-control" placeholder="Shorten url" id="shorten_url" disabled>
+                        <button class="btn btn-success" type="button" onclick="copyToClipboard()">copy Url</button>
+                      </div>
+                      <div id="text">
+
+                      </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+   
+        var copyText = document.getElementById("shorten_url");
+        let text = document.getElementById('text')
+                function copyToClipboard() {
+                    text.innerHTML = ""
+            // Get the text field
+
+            // Select the text field
+            copyText.select();
+            copyText.setSelectionRange(0, 99999); // For mobile devices
+
+            // Copy the text inside the text field to the clipboard
+            navigator.clipboard.writeText(copyText.value).then(function() {
+                    text.innerHTML = `<div class="alert alert-success" >Text copied to clipboard: ${copyText.value}</div>`;
+                    }).catch(function(error) {
+                text.innerHTML = `<div class="alert alert-danger" >Failed to copy text: ${error}</div>`;
+            });
+        }
+        function isValidURL(string) {
+  var res = string.match(/(http|https):\/\/(\w+:?\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/);
+  return (res !== null);
+}
+        function shorten(){
+            text.innerHTML = ""
+      
+            let xhr = new XMLHttpRequest();
+            xhr.open('POST', 'http://localhost:8000/create', true);
+            let form = document.getElementById('form');
+            let data = new FormData(form);
+            xhr.onload = ()=>{
+                
+                if(isValidURL(xhr.responseText)){
+                    copyText.value = xhr.responseText
+                    }else{
+                        text.innerHTML = `<div class="alert alert-danger" >${xhr.responseText}</div>`;
+
+                }
+              
+            }
+            xhr.send(data);
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+</body>
+</html>
